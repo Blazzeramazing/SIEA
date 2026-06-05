@@ -206,7 +206,7 @@
                         <i class="ph ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
                         <input type="text" id="search-product" placeholder="Pesquisar nome ou código de barras..." class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm text-sm sm:text-base">
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 md:hidden">
                         <button onclick="exportPDF('products')" class="flex-1 sm:flex-none bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition-all shadow-sm text-sm sm:text-base">
                             <i class="ph ph-file-pdf text-red-500 text-lg"></i> <span class="hidden sm:inline">PDF Estoque</span><span class="sm:hidden">PDF</span>
                         </button>
@@ -245,7 +245,7 @@
                         <i class="ph ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
                         <input type="text" id="search-person" placeholder="Buscar por nome, cargo ou posto..." class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm text-sm sm:text-base">
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 md:hidden">
                         <button onclick="exportPDF('people')" class="flex-1 sm:flex-none bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition-all shadow-sm text-sm sm:text-base">
                             <i class="ph ph-file-pdf text-red-500 text-lg"></i> <span class="hidden sm:inline">PDF Efetivo</span><span class="sm:hidden">PDF</span>
                         </button>
@@ -355,7 +355,7 @@
                         <button onclick="renderHistory()" class="flex-1 sm:flex-none bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-xl font-bold transition-all shadow-sm">
                             Filtrar
                         </button>
-                        <button onclick="exportPDF('history')" class="flex-1 sm:flex-none bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-3 rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 lg:hidden">
+                        <button onclick="exportPDF('history')" class="flex-1 sm:flex-none bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-3 rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 md:hidden">
                             <i class="ph-fill ph-file-pdf text-red-500 text-lg"></i> PDF
                         </button>
                     </div>
