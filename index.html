@@ -100,7 +100,7 @@
                 <h1 class="font-bold text-slate-800">Sistema Integrado</h1>
             </div>
             <div class="flex items-center gap-3">
-                <button id="install-app-btn-mobile" onclick="installApp()" title="Instalar App" class="flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"><i class="ph-bold ph-app-window text-base"></i> Instalar</button>
+                <button id="install-app-btn-mobile" onclick="installApp()" title="Instalar App" class="hidden items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"><i class="ph-bold ph-download-simple text-base"></i> Instalar</button>
                 <button onclick="exportBackup()" title="Backup Offline" class="text-slate-400 hover:text-blue-600 transition-colors"><i class="ph-bold ph-download-simple text-xl"></i></button>
                 <button onclick="document.getElementById('backup-file-input').click()" title="Restaurar Backup" class="text-slate-400 hover:text-blue-600 transition-colors"><i class="ph-bold ph-upload-simple text-xl"></i></button>
                 <div id="connection-status-mobile" class="flex items-center ml-1">
@@ -119,8 +119,8 @@
                 </div>
                 <div class="w-px h-6 bg-slate-200"></div>
                 
-                <button id="install-app-btn" onclick="installApp()" title="Instalar Aplicativo" class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow hover:shadow-lg transition-all transform hover:-translate-y-0.5">
-                    <i class="ph-bold ph-app-window text-lg"></i> Instalar App
+                <button id="install-app-btn" onclick="installApp()" title="Instalar Aplicativo" class="hidden items-center gap-2 px-4 py-2 text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                    <i class="ph-bold ph-download-simple text-lg"></i> Instalar App
                 </button>
 
                 <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-lg border border-slate-200">
@@ -577,22 +577,16 @@
             const manifest = {
                 name: "Sistema Integrado",
                 short_name: "Estoque",
-                start_url: ".",
+                start_url: window.location.href,
                 display: "standalone",
                 background_color: "#f8fafc",
                 theme_color: "#1e293b",
-                icons: [
-                    {
-                        src: "https://placehold.co/192x192/1e293b/ffffff/png?text=box",
-                        sizes: "192x192",
-                        type: "image/png"
-                    },
-                    {
-                        src: "https://placehold.co/512x512/1e293b/ffffff/png?text=box",
-                        sizes: "512x512",
-                        type: "image/png"
-                    }
-                ]
+                icons: [{
+                    src: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>",
+                    sizes: "192x192 512x512",
+                    type: "image/svg+xml",
+                    purpose: "any maskable"
+                }]
             };
             const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
             const manifestLink = document.createElement('link');
@@ -616,6 +610,11 @@
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
+                // Exibe os botões de instalação
+                const btnDesk = document.getElementById('install-app-btn');
+                const btnMob = document.getElementById('install-app-btn-mobile');
+                if(btnDesk) { btnDesk.classList.remove('hidden'); btnDesk.classList.add('flex'); }
+                if(btnMob) { btnMob.classList.remove('hidden'); btnMob.classList.add('flex'); }
             });
 
             window.installApp = async () => {
@@ -623,10 +622,15 @@
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
                     if (outcome === 'accepted') {
-                        deferredPrompt = null;
+                        // Oculta botões após instalar
+                        const btnDesk = document.getElementById('install-app-btn');
+                        const btnMob = document.getElementById('install-app-btn-mobile');
+                        if(btnDesk) { btnDesk.classList.add('hidden'); btnDesk.classList.remove('flex'); }
+                        if(btnMob) { btnMob.classList.add('hidden'); btnMob.classList.remove('flex'); }
                     }
+                    deferredPrompt = null;
                 } else {
-                    customConfirm("<div class='text-left text-sm text-slate-600 space-y-3'><b>O navegador bloqueou a instalação.</b><br>Para instalar um sistema web como App, regras rigorosas de segurança exigem que ele esteja hospedado online.<br><br><b>Como resolver:</b><br>1. Salve este código HTML no seu computador.<br>2. Crie uma conta no <b>Netlify.com</b> ou <b>Vercel.com</b>.<br>3. Faça o upload gratuito do arquivo.<br>4. Acesse o link gerado pelo seu celular ou PC e clique aqui novamente!</div>", () => {});
+                    showToast("A instalação não está disponível no momento ou o app já está instalado. Tente gravar o ficheiro no computador e abrir diretamente no Google Chrome ou Safari.", "error");
                 }
             };
         };
