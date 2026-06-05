@@ -594,6 +594,18 @@
             manifestLink.href = URL.createObjectURL(manifestBlob);
             document.head.appendChild(manifestLink);
 
+            // Registo do Service Worker dinâmico (obrigatório para ativar o evento de instalação no Chrome)
+            if ('serviceWorker' in navigator) {
+                const swCode = "self.addEventListener('install', (e) => { self.skipWaiting(); }); self.addEventListener('activate', (e) => { self.clients.claim(); }); self.addEventListener('fetch', (e) => { });";
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                const swUrl = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swUrl).then(() => {
+                    console.log("PWA Service Worker registado com sucesso.");
+                }).catch((err) => {
+                    console.log("Nota: Registo do SW falhou. Em ambientes restritos (como iframes), o PWA pode não funcionar.", err);
+                });
+            }
+
             let deferredPrompt;
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
@@ -618,7 +630,7 @@
                     }
                     deferredPrompt = null;
                 } else {
-                    showToast("A instalação não está disponível no momento ou o app já está instalado. Tente no Google Chrome ou Safari.", "error");
+                    showToast("A instalação não está disponível no momento ou o app já está instalado. Tente gravar o ficheiro no computador e abrir diretamente no Google Chrome ou Safari.", "error");
                 }
             };
         };
