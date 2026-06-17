@@ -155,7 +155,7 @@
         </nav>
 
         <!-- Telas do SPA -->
-        <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-28 md:pb-8 no-scrollbar" id="main-content">
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-32 md:pb-8 no-scrollbar" id="main-content">
             
             <!-- ================= TELA: DASHBOARD ================= -->
             <div id="view-dashboard" class="view block space-y-6 animate-fade-in">
@@ -193,17 +193,17 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col">
                         <div class="p-5 border-b border-slate-100 flex items-center gap-2 text-red-600">
-                            <i class="ph-fill ph-warning text-xl"></i><h3 class="font-bold">Atenção: Estoque Baixo</h3>
+                            <i class="ph-fill ph-warning text-xl"></i><h3 class="font-bold">Atenção: Alertas do Estoque</h3>
                         </div>
-                        <div class="flex-1 overflow-y-auto max-h-80" id="dash-alerts-container"></div>
+                        <div class="flex-1 overflow-y-auto max-h-[28rem]" id="dash-alerts-container"></div>
                     </div>
 
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col">
                         <div class="p-5 border-b border-slate-100 flex justify-between items-center">
                             <h3 class="font-bold text-slate-800">Últimas Movimentações</h3>
-                            <button onclick="navigate('history')" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Ver todas</button>
+                            <button onclick="navigate('history')" class="text-sm text-blue-600 hover:text-blue-800 font-medium bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">Ver todas</button>
                         </div>
-                        <div class="flex-1 overflow-y-auto max-h-80" id="dash-latest-movements"></div>
+                        <div class="flex-1 overflow-y-auto max-h-[28rem]" id="dash-latest-movements"></div>
                     </div>
                 </div>
             </div>
@@ -215,6 +215,10 @@
                         <i class="ph ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
                         <input type="text" id="search-product" placeholder="Pesquisar nome ou código de barras..." class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm text-sm sm:text-base">
                     </div>
+                    <select id="sort-products" class="w-full sm:w-auto p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-slate-700 bg-white">
+                        <option value="name">Ordem Alfabética</option>
+                        <option value="expiry">Vencimento Próximo</option>
+                    </select>
                     <div class="flex gap-2 md:hidden">
                         <button onclick="exportPDF('products')" class="flex-1 sm:flex-none bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition-all shadow-sm text-sm sm:text-base">
                             <i class="ph ph-file-pdf text-red-500 text-lg"></i> <span class="hidden sm:inline">PDF Estoque</span><span class="sm:hidden">PDF</span>
@@ -232,7 +236,7 @@
                                 <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
                                     <th class="p-4 pl-6">Descrição do Material</th>
                                     <th class="p-4">Categoria</th>
-                                    <th class="p-4 text-center">Tamanho</th>
+                                    <th class="p-4 text-center">Validade</th>
                                     <th class="p-4 text-center">Quantidade</th>
                                     <th class="p-4 text-right pr-6">Ações Rápidas</th>
                                 </tr>
@@ -318,8 +322,8 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-1.5">Quantidade *</label>
-                                <input type="number" id="mov_qty" required min="0.01" step="any" class="w-full p-3.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                                <label class="block text-sm font-bold text-slate-700 mb-1.5">Quantidade (Itens inteiros) *</label>
+                                <input type="number" id="mov_qty" required min="1" step="1" placeholder="Ex: 5" class="w-full p-3.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 mb-1.5">Data *</label>
@@ -341,6 +345,12 @@
 
             <!-- ================= TELA: HISTÓRICO ================= -->
             <div id="view-history" class="view hidden space-y-4 animate-fade-in">
+                <!-- Botão Voltar Mobile -->
+                <div class="md:hidden flex items-center mb-1">
+                    <button onclick="navigate('dashboard')" class="text-slate-600 hover:text-blue-600 flex items-center gap-2 text-sm font-bold bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-200 transition-all">
+                        <i class="ph-bold ph-arrow-left text-lg"></i> Voltar ao Painel
+                    </button>
+                </div>
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-4 lg:items-end flex-wrap">
                     <div class="flex-1 lg:min-w-[200px]">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Filtrar por Material</label>
@@ -398,7 +408,7 @@
     <!-- Modal: Produto -->
     <div id="modal-product" class="fixed inset-0 z-[60] hidden items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm modal-overlay" onclick="closeModal('modal-product')"></div>
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10 modal-content flex flex-col max-h-[90vh] overflow-y-auto no-scrollbar">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl relative z-10 modal-content flex flex-col max-h-[90vh] overflow-y-auto no-scrollbar">
             <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
                 <h3 id="modal-product-title" class="text-lg font-bold text-slate-800 flex items-center gap-2">Novo Material</h3>
                 <button onclick="closeModal('modal-product')" class="text-slate-400 hover:text-slate-600 bg-white rounded-full p-1 shadow-sm"><i class="ph ph-x text-xl"></i></button>
@@ -414,11 +424,11 @@
                         <input type="text" id="prod_barcode" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('prod_name').focus();}" placeholder="Biper ou digitar..." class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1">Nome / Descrição *</label>
-                        <input type="text" id="prod_name" required placeholder="Ex: Camisa Polo Tática" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Nome / Descrição *</label>
+                            <input type="text" id="prod_name" required placeholder="Ex: Arroz Branco" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-1">Categoria *</label>
                             <select id="prod_category" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
@@ -430,26 +440,60 @@
                                 <option value="Outros">Outros</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1" title="Tamanho da roupa, peso, etc">Tamanho/Detalhe</label>
-                            <input type="text" id="prod_size" placeholder="Ex: M, 42, 1Kg..." class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1">Tipo de Embalagem *</label>
+                                <select id="prod_pack" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                                    <option value="un">Unidade (un)</option>
+                                    <option value="pct">Pacote (pct)</option>
+                                    <option value="cx">Caixa (cx)</option>
+                                    <option value="fd">Fardo (fd)</option>
+                                    <option value="lt">Lata (lt)</option>
+                                    <option value="gf">Garrafa (gf)</option>
+                                    <option value="par">Par (par)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1">Detalhe / Tamanho (Roupas/etc)</label>
+                                <input type="text" id="prod_size" placeholder="Ex: M, 42, Azul..." class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1" title="Se for alimento ou líquido, informe o peso/volume de 1 embalagem">Conteúdo por Embalagem</label>
+                                <input type="number" id="prod_weight" min="0" step="any" placeholder="Ex: 1, 500, 2.5..." class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1">Medida do Conteúdo</label>
+                                <select id="prod_weight_unit" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                                    <option value="">Nenhuma / Não se aplica</option>
+                                    <option value="Kg">Quilograma (Kg)</option>
+                                    <option value="g">Grama (g)</option>
+                                    <option value="L">Litro (L)</option>
+                                    <option value="ml">Mililitro (ml)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">Unidade *</label>
-                            <select id="prod_unit" required class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
-                                <option value="un">Unidade (un)</option><option value="par">Par (par)</option><option value="Kg">Quilograma (Kg)</option><option value="L">Litro (L)</option><option value="cx">Caixa (cx)</option>
-                            </select>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Estoque Mín. (Qtd. Embalagens) *</label>
+                            <input type="number" id="prod_min_qty" required min="1" step="1" value="5" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">Estoque Mín. *</label>
-                            <input type="number" id="prod_min_qty" required min="0" step="any" value="5" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Validade / Vencimento (Opcional)</label>
+                            <input type="date" id="prod_expiry" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
                         </div>
                     </div>
+
                     <div id="div_initial_qty" class="pt-2">
-                        <label class="block text-sm font-bold text-slate-700 mb-1">Estoque Inicial Atual</label>
-                        <input type="number" id="prod_initial_qty" min="0" step="any" placeholder="0" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-emerald-50">
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Estoque Inicial Atual (Qtd. Embalagens)</label>
+                        <input type="number" id="prod_initial_qty" min="0" step="1" placeholder="0" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-emerald-50">
                     </div>
                     <div class="pt-4 flex justify-end gap-3">
                         <button type="button" onclick="closeModal('modal-product')" class="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition-colors">Cancelar</button>
@@ -530,8 +574,8 @@
                             <select id="assign_product" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"></select>
                         </div>
                         <div class="w-full md:w-24">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Qtd *</label>
-                            <input type="number" id="assign_qty" required min="0.01" step="any" value="1" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Qtd (Int) *</label>
+                            <input type="number" id="assign_qty" required min="1" step="1" value="1" class="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                         </div>
                         <button type="submit" id="btn-assign" class="w-full md:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors">Entregar</button>
                     </form>
@@ -675,7 +719,7 @@
         let activePersonId = null; 
 
         // ESTADO DE PAGINAÇÃO
-        const ITEMS_PER_PAGE = 12;
+        const ITEMS_PER_PAGE = 10;
         let pageState = { products: 1, people: 1, history: 1 };
 
         // LISTENERS
@@ -858,9 +902,15 @@
             const name = document.getElementById('prod_name').value.trim();
             const category = document.getElementById('prod_category').value;
             const size = document.getElementById('prod_size').value.trim();
-            const unit = document.getElementById('prod_unit').value;
-            const minQty = parseFloat(document.getElementById('prod_min_qty').value);
-            const initialQty = parseFloat(document.getElementById('prod_initial_qty').value);
+            
+            // Novos campos baseados em embalagem
+            const unit = document.getElementById('prod_pack').value;
+            const weight = parseFloat(document.getElementById('prod_weight').value) || 0;
+            const weightUnit = document.getElementById('prod_weight_unit').value;
+            
+            const minQty = parseInt(document.getElementById('prod_min_qty').value);
+            const initialQty = parseInt(document.getElementById('prod_initial_qty').value);
+            const expiryDate = document.getElementById('prod_expiry').value;
 
             const safeMinQty = isNaN(minQty) ? 0 : minQty;
             const safeInitQty = isNaN(initialQty) ? 0 : initialQty;
@@ -870,7 +920,7 @@
                 if (existing) return showToast(`Código ${barcode} já em uso pelo item: ${existing.name}`, "error");
             }
 
-            const data = { barcode, name, category, size, unit, minQty: safeMinQty, updatedAt: new Date().toISOString() };
+            const data = { barcode, name, category, size, unit, weight, weightUnit, minQty: safeMinQty, expiryDate, updatedAt: new Date().toISOString() };
             const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
 
             try {
@@ -956,9 +1006,10 @@
             
             const select = document.getElementById('assign_product');
             select.innerHTML = '<option value="">Escolha um item...</option>' + 
-                products.filter(p => p.currentQty > 0).map(p => 
-                    `<option value="${p.id}">${p.name} ${p.size ? `(Tam: ${p.size})` : ''} - Disp: ${formatNumber(p.currentQty)}</option>`
-                ).join('');
+                products.filter(p => p.currentQty > 0).map(p => {
+                    const weightText = (p.weight > 0 && p.weightUnit) ? ` [Total: ${formatNumber(p.currentQty * p.weight)} ${p.weightUnit}]` : '';
+                    return `<option value="${p.id}">${p.name} ${p.size ? `(${p.size})` : ''} - Disp: ${formatNumber(p.currentQty)} ${p.unit}${weightText}</option>`;
+                }).join('');
             
             document.getElementById('assign_qty').value = 1;
             document.getElementById('assign_barcode').value = '';
@@ -985,7 +1036,7 @@
             btn.disabled = true;
 
             const productId = document.getElementById('assign_product').value;
-            const rawQty = parseFloat(document.getElementById('assign_qty').value);
+            const rawQty = parseInt(document.getElementById('assign_qty').value);
             
             if(!productId || isNaN(rawQty) || rawQty <= 0) { 
                 showToast("Quantidade inválida.", "error"); 
@@ -1104,12 +1155,12 @@
 
             const type = document.querySelector('input[name="mov_type"]:checked').value;
             const productId = document.getElementById('mov_product').value;
-            const rawQty = parseFloat(document.getElementById('mov_qty').value);
+            const rawQty = parseInt(document.getElementById('mov_qty').value);
             const date = document.getElementById('mov_date').value;
             const note = document.getElementById('mov_note').value.trim();
 
             if(!productId || isNaN(rawQty) || rawQty <= 0) {
-                showToast("Confirme o produto e quantidade.", "error");
+                showToast("Confirme o produto e a quantidade inteira.", "error");
                 btn.disabled = false; return;
             }
 
@@ -1158,20 +1209,58 @@
             document.getElementById('dash-items-used').innerText = formatNumber(itemsUsed);
 
             const lowStock = products.filter(p => p.currentQty <= p.minQty);
-            document.getElementById('dash-low-stock').innerText = lowStock.length;
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            const expiringSoon = products.filter(p => {
+                if(!p.expiryDate || p.currentQty <= 0) return false;
+                const exp = new Date(p.expiryDate);
+                exp.setHours(23,59,59,999);
+                const diffTime = exp - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 30;
+            }).map(p => {
+                const exp = new Date(p.expiryDate);
+                const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+                return { ...p, diffDays };
+            }).sort((a,b) => a.diffDays - b.diffDays);
+
+            document.getElementById('dash-low-stock').innerText = lowStock.length + expiringSoon.length;
             
             const alertsCont = document.getElementById('dash-alerts-container');
-            if(lowStock.length === 0) {
-                alertsCont.innerHTML = `<div class="p-6 text-center text-slate-400"><i class="ph ph-smiley text-3xl mb-2"></i><br>Estoque estabilizado.</div>`;
-            } else {
-                alertsCont.innerHTML = lowStock.map(p => `
-                    <div class="p-4 border-b border-slate-50 flex justify-between items-center hover:bg-red-50/50">
-                        <div><p class="font-bold text-slate-800 text-sm">${p.name} ${p.size?`(${p.size})`:''}</p><p class="text-xs text-slate-500">Mínimo: ${formatNumber(p.minQty)}</p></div>
-                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold border border-red-200">Atual: ${formatNumber(p.currentQty)}</span>
+            let alertsHtml = '';
+
+            if (expiringSoon.length > 0) {
+                alertsHtml += `<div class="px-5 py-2 bg-amber-50 text-amber-700 font-bold text-xs uppercase tracking-wider sticky top-0 z-10 backdrop-blur-sm">⚠️ Validade Crítica (<= 30 dias)</div>`;
+                alertsHtml += expiringSoon.map(p => {
+                    const isExpired = p.diffDays < 0;
+                    const statusText = isExpired ? `Vencido há ${Math.abs(p.diffDays)} dias` : (p.diffDays === 0 ? 'Vence hoje' : `Vence em ${p.diffDays} dias`);
+                    const statusColor = isExpired ? 'bg-red-100 text-red-700 border-red-200' : 'bg-amber-100 text-amber-700 border-amber-200';
+                    return `
+                    <div class="p-4 border-b border-slate-50 flex justify-between items-center hover:bg-slate-50">
+                        <div class="min-w-0 pr-3"><p class="font-bold text-slate-800 text-sm truncate">${p.name}</p><p class="text-[10px] uppercase font-bold text-slate-400 mt-0.5">Disp: ${formatNumber(p.currentQty)} ${p.unit}</p></div>
+                        <span class="px-2 py-1 rounded text-[10px] font-bold border ${statusColor} whitespace-nowrap">${statusText}</span>
+                    </div>`;
+                }).join('');
+            }
+
+            if(lowStock.length > 0) {
+                alertsHtml += `<div class="px-5 py-2 bg-red-50 text-red-700 font-bold text-xs uppercase tracking-wider sticky top-0 z-10 backdrop-blur-sm">📉 Estoque Baixo</div>`;
+                alertsHtml += lowStock.map(p => `
+                    <div class="p-4 border-b border-slate-50 flex justify-between items-center hover:bg-slate-50">
+                        <div class="min-w-0 pr-3"><p class="font-bold text-slate-800 text-sm truncate">${p.name} ${p.size?`(${p.size})`:''}</p><p class="text-[10px] uppercase font-bold text-slate-400 mt-0.5">Mínimo: ${formatNumber(p.minQty)} ${p.unit}</p></div>
+                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px] font-bold border border-red-200 whitespace-nowrap">Atual: ${formatNumber(p.currentQty)}</span>
                     </div>`).join('');
             }
 
-            const recent = movements.slice(0, 5);
+            if(alertsHtml === '') {
+                alertsCont.innerHTML = `<div class="p-6 text-center text-slate-400"><i class="ph ph-smiley text-3xl mb-2"></i><br>Estoque e validades estabilizados.</div>`;
+            } else {
+                alertsCont.innerHTML = alertsHtml;
+            }
+
+            const recent = movements.slice(0, 10);
             const histCont = document.getElementById('dash-latest-movements');
             if(recent.length === 0) {
                 histCont.innerHTML = `<div class="p-6 text-center text-slate-400">Nenhum registro.</div>`;
@@ -1246,16 +1335,29 @@
         function renderProducts() {
             const tbody = document.getElementById('products-table-body');
             const search = document.getElementById('search-product').value;
+            const sortMethod = document.getElementById('sort-products') ? document.getElementById('sort-products').value : 'name';
             
-            const filtered = products.filter(p => 
+            let filtered = products.filter(p => 
                 smartSearch(p.name, search) || 
                 smartSearch(p.category, search) || 
                 smartSearch(p.size, search) ||
                 smartSearch(p.barcode, search)
             );
 
+            if (sortMethod === 'expiry') {
+                filtered.sort((a, b) => {
+                    if (!a.expiryDate && !b.expiryDate) return 0;
+                    if (!a.expiryDate) return 1;
+                    if (!b.expiryDate) return -1;
+                    return new Date(a.expiryDate) - new Date(b.expiryDate);
+                });
+            } else {
+                filtered.sort((a, b) => a.name.localeCompare(b.name));
+            }
+
             const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
             if (pageState.products > totalPages) pageState.products = totalPages;
+            if (pageState.products < 1) pageState.products = 1;
 
             const start = (pageState.products - 1) * ITEMS_PER_PAGE;
             const paginated = filtered.slice(start, start + ITEMS_PER_PAGE);
@@ -1268,16 +1370,41 @@
             
             tbody.innerHTML = paginated.map(p => {
                 const isLow = p.currentQty <= p.minQty;
+                
+                let expiryHtml = '<span class="text-slate-400">-</span>';
+                if (p.expiryDate) {
+                    const today = new Date(); today.setHours(0,0,0,0);
+                    const exp = new Date(p.expiryDate); exp.setHours(23,59,59,999);
+                    const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+                    
+                    let colorClass = "text-slate-600 bg-slate-100 border-slate-200";
+                    if (diffDays < 0) colorClass = "text-red-700 bg-red-100 border-red-200";
+                    else if (diffDays <= 30) colorClass = "text-amber-700 bg-amber-100 border-amber-200";
+
+                    expiryHtml = `<span class="px-2 py-0.5 rounded border text-[10px] uppercase tracking-wider font-bold ${colorClass} whitespace-nowrap">${formatDateBR(p.expiryDate)}</span>`;
+                }
+
+                let weightHtml = '';
+                if (p.weight > 0 && p.weightUnit) {
+                    const totalWeight = p.currentQty * p.weight;
+                    weightHtml = `<div class="text-[10px] text-slate-400 font-medium mt-0.5">Total: ${formatNumber(totalWeight)} ${p.weightUnit}</div>`;
+                }
+
                 return `
                 <tr class="hover:bg-slate-50 transition-colors group">
                     <td class="p-4 border-b border-slate-50 pl-6">
                         <div class="font-bold text-slate-800">${p.name}</div>
-                        ${p.barcode ? `<div class="text-[10px] text-slate-400 font-medium flex items-center gap-1 mt-0.5"><i class="ph ph-barcode"></i> ${p.barcode}</div>` : ''}
+                        <div class="text-[10px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
+                            ${p.barcode ? `<span><i class="ph ph-barcode"></i> ${p.barcode}</span>` : ''}
+                            ${p.barcode && p.size ? '<span class="mx-1">•</span>' : ''}
+                            ${p.size ? `<span>Tam: ${p.size}</span>` : ''}
+                        </div>
                     </td>
                     <td class="p-4 border-b border-slate-50 text-slate-500 text-sm">${p.category}</td>
-                    <td class="p-4 border-b border-slate-50 text-center"><span class="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded font-bold text-xs">${p.size || '-'}</span></td>
+                    <td class="p-4 border-b border-slate-50 text-center">${expiryHtml}</td>
                     <td class="p-4 border-b border-slate-50 text-center">
                         <span class="px-2.5 py-1 rounded-lg text-sm font-bold ${isLow ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-slate-100 text-slate-700'}">${formatNumber(p.currentQty)} <span class="text-xs font-normal">${p.unit}</span></span>
+                        ${weightHtml}
                     </td>
                     <td class="p-4 border-b border-slate-50 text-right pr-6">
                         <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="p-1.5 text-blue-500 hover:bg-blue-50 rounded" title="Editar"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
@@ -1301,6 +1428,7 @@
 
             const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
             if (pageState.people > totalPages) pageState.people = totalPages;
+            if (pageState.people < 1) pageState.people = 1;
 
             const start = (pageState.people - 1) * ITEMS_PER_PAGE;
             const paginated = filtered.slice(start, start + ITEMS_PER_PAGE);
@@ -1373,6 +1501,7 @@
 
             const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
             if (pageState.history > totalPages) pageState.history = totalPages;
+            if (pageState.history < 1) pageState.history = 1;
             
             const start = (pageState.history - 1) * ITEMS_PER_PAGE;
             const paginated = filtered.slice(start, start + ITEMS_PER_PAGE);
@@ -1416,13 +1545,19 @@
                 doc.setTextColor(100);
                 doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 22);
 
-                const tableColumn = ["Código", "Descrição", "Categoria", "Tamanho", "Quantidade"];
-                const tableRows = products.map(p => [p.barcode || '-', p.name || '-', p.category || '-', p.size || '-', `${formatNumber(p.currentQty)} ${p.unit||''}`]);
+                const tableColumn = ["Código", "Descrição", "Categoria", "Validade", "Quantidade Total"];
+                const tableRows = products.map(p => {
+                    const validade = p.expiryDate ? formatDateBR(p.expiryDate) : '-';
+                    const qtyBase = `${formatNumber(p.currentQty)} ${p.unit||''}`;
+                    const qtyTotal = (p.weight > 0 && p.weightUnit) ? `${qtyBase} (${formatNumber(p.currentQty * p.weight)} ${p.weightUnit})` : qtyBase;
+                    return [p.barcode || '-', p.name || '-', p.category || '-', validade, qtyTotal];
+                });
 
                 doc.autoTable({
                     head: [tableColumn], body: tableRows, startY: 28,
-                    styles: { fontSize: 9, cellPadding: 3 },
-                    headStyles: { fillColor: [15, 23, 42] } 
+                    styles: { fontSize: 9, cellPadding: 3, valign: 'middle' },
+                    headStyles: { fillColor: [37, 99, 235] },
+                    columnStyles: { 2: { cellWidth: 80 } }
                 });
                 doc.save(`relatorio_estoque_${Date.now()}.pdf`);
                 showToast("PDF de Estoque Gerado!", "success");
@@ -1583,6 +1718,9 @@
 
         // ================= UTILITÁRIOS E UI =================
         document.getElementById('search-product').addEventListener('input', () => { pageState.products = 1; renderProducts(); });
+        if(document.getElementById('sort-products')) {
+            document.getElementById('sort-products').addEventListener('change', () => { pageState.products = 1; renderProducts(); });
+        }
         document.getElementById('search-person').addEventListener('input', () => { pageState.people = 1; renderPeople(); });
         document.getElementById('filter-history-product').addEventListener('change', () => { pageState.history = 1; renderHistory(); });
         document.getElementById('filter-history-type').addEventListener('change', () => { pageState.history = 1; renderHistory(); });
@@ -1593,7 +1731,10 @@
             const selectMov = document.getElementById('mov_product');
             const currentMovVal = selectMov.value;
             selectMov.innerHTML = '<option value="">Selecione um material...</option>' + 
-                products.map(p => `<option value="${p.id}">${p.name} ${p.size ? `(${p.size})` : ''} - [${formatNumber(p.currentQty)} ${p.unit}]</option>`).join('');
+                products.map(p => {
+                    const weightText = (p.weight > 0 && p.weightUnit) ? ` [Total: ${formatNumber(p.currentQty * p.weight)} ${p.weightUnit}]` : '';
+                    return `<option value="${p.id}">${p.name} ${p.size ? `(${p.size})` : ''} - Disp: ${formatNumber(p.currentQty)} ${p.unit}${weightText}</option>`;
+                }).join('');
             selectMov.value = currentMovVal;
 
             selectMov.addEventListener('change', (e) => {
@@ -1634,6 +1775,7 @@
         window.openProductModal = () => {
             document.getElementById('form-product').reset();
             document.getElementById('prod_id').value = '';
+            document.getElementById('prod_expiry').value = '';
             document.getElementById('modal-product-title').innerHTML = '<i class="ph-bold ph-plus text-blue-600 text-xl"></i> Novo Material';
             document.getElementById('div_initial_qty').classList.remove('hidden');
             openModal('modal-product');
@@ -1646,8 +1788,11 @@
             document.getElementById('prod_name').value = p.name;
             document.getElementById('prod_category').value = p.category;
             document.getElementById('prod_size').value = p.size || '';
-            document.getElementById('prod_unit').value = p.unit;
+            document.getElementById('prod_pack').value = p.unit || 'un';
+            document.getElementById('prod_weight').value = p.weight || '';
+            document.getElementById('prod_weight_unit').value = p.weightUnit || '';
             document.getElementById('prod_min_qty').value = p.minQty;
+            document.getElementById('prod_expiry').value = p.expiryDate || '';
             document.getElementById('modal-product-title').innerHTML = '<i class="ph-bold ph-pencil-simple text-blue-600 text-xl"></i> Editar Material';
             document.getElementById('div_initial_qty').classList.add('hidden');
             openModal('modal-product');
