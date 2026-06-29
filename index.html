@@ -86,7 +86,7 @@
                 <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span></span>
                 Conectando...
             </div>
-            Gestão Integrada v2.1
+            Gestão Integrada v2.3 (Lotes/FEFO)
         </div>
     </aside>
 
@@ -184,7 +184,7 @@
                     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex items-center gap-4">
                         <div class="bg-red-50 text-red-600 p-3.5 rounded-xl"><i class="ph ph-warning-circle text-2xl"></i></div>
                         <div>
-                            <p class="text-sm text-slate-500 font-medium">Estoque Baixo</p>
+                            <p class="text-sm text-slate-500 font-medium">Estoque Baixo/Alertas</p>
                             <p class="text-2xl font-bold text-slate-800" id="dash-low-stock">0</p>
                         </div>
                     </div>
@@ -236,7 +236,7 @@
                                 <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
                                     <th class="p-4 pl-6">Descrição do Material</th>
                                     <th class="p-4">Categoria</th>
-                                    <th class="p-4 text-center">Validade</th>
+                                    <th class="p-4 text-center">Validade (Prox. Lote)</th>
                                     <th class="p-4 text-center">Quantidade</th>
                                     <th class="p-4 text-right pr-6">Ações Rápidas</th>
                                 </tr>
@@ -277,7 +277,7 @@
             </div>
 
             <!-- ================= TELA: MOVIMENTAÇÕES AVULSAS ================= -->
-            <div id="view-movements" class="view hidden space-y-6 max-w-2xl mx-auto mt-4 animate-fade-in">
+            <div id="view-movements" class="view hidden space-y-6 max-w-3xl mx-auto mt-4 animate-fade-in">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
                     <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                         <i class="ph-fill ph-arrows-left-right text-blue-600"></i> Lançar Movimentação Manual
@@ -289,7 +289,7 @@
                                 <input type="radio" name="mov_type" value="in" class="peer sr-only" checked onchange="updateMovementFormUI()">
                                 <div class="p-4 rounded-xl border-2 border-slate-100 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 transition-all text-center">
                                     <i class="ph-fill ph-arrow-circle-down text-3xl text-emerald-500 mb-1"></i>
-                                    <div class="font-bold text-slate-800">Entrada</div>
+                                    <div class="font-bold text-slate-800">Entrada (Adicionar)</div>
                                     <div class="text-[10px] text-slate-500 uppercase tracking-wider font-bold mt-1">Compra/Doação</div>
                                 </div>
                             </label>
@@ -297,7 +297,7 @@
                                 <input type="radio" name="mov_type" value="out" class="peer sr-only" onchange="updateMovementFormUI()">
                                 <div class="p-4 rounded-xl border-2 border-slate-100 peer-checked:border-amber-500 peer-checked:bg-amber-50 transition-all text-center">
                                     <i class="ph-fill ph-arrow-circle-up text-3xl text-amber-500 mb-1"></i>
-                                    <div class="font-bold text-slate-800">Saída</div>
+                                    <div class="font-bold text-slate-800">Saída (Baixa)</div>
                                     <div class="text-[10px] text-slate-500 uppercase tracking-wider font-bold mt-1">Consumo/Descarte</div>
                                 </div>
                             </label>
@@ -320,14 +320,19 @@
                             </p>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-1.5">Quantidade (Itens inteiros) *</label>
+                                <label class="block text-sm font-bold text-slate-700 mb-1.5">Qtd (Itens) *</label>
                                 <input type="number" id="mov_qty" required min="1" step="1" placeholder="Ex: 5" class="w-full p-3.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-1.5">Data *</label>
+                                <label class="block text-sm font-bold text-slate-700 mb-1.5">Data Movimento *</label>
                                 <input type="date" id="mov_date" required class="w-full p-3.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
+                            </div>
+                            <!-- CAMPO PARA LOTES (Apenas na Entrada) -->
+                            <div id="mov_expiry_div" class="transition-all">
+                                <label class="block text-sm font-bold text-emerald-700 mb-1.5" title="Data de validade apenas para os itens desta entrada">Vencimento (Lote)</label>
+                                <input type="date" id="mov_batch_expiry" class="w-full p-3.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700">
                             </div>
                         </div>
 
@@ -352,10 +357,14 @@
                     </button>
                 </div>
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-4 lg:items-end flex-wrap">
+                    
                     <div class="flex-1 lg:min-w-[200px]">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Filtrar por Material</label>
-                        <select id="filter-history-product" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium text-sm"></select>
+                        <!-- Campo melhorado com datalist e pesquisa fluída -->
+                        <input type="text" id="filter-history-product" list="history-products-list" placeholder="Nome ou bipe o código..." class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium text-sm text-slate-700">
+                        <datalist id="history-products-list"></datalist>
                     </div>
+
                     <div class="w-full sm:w-32">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tipo</label>
                         <select id="filter-history-type" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium text-sm">
@@ -457,7 +466,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-1">Detalhe / Tamanho (Roupas/etc)</label>
+                                <label class="block text-sm font-bold text-slate-700 mb-1">Detalhe / Tamanho</label>
                                 <input type="text" id="prod_size" placeholder="Ex: M, 42, Azul..." class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                             </div>
                         </div>
@@ -482,22 +491,25 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">Estoque Mín. (Qtd. Embalagens) *</label>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Estoque Mín. (Qtd. Alerta) *</label>
                             <input type="number" id="prod_min_qty" required min="1" step="1" value="5" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">Validade / Vencimento (Opcional)</label>
-                            <input type="date" id="prod_expiry" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-slate-700">
+                        <div id="div_initial_expiry">
+                            <label class="block text-sm font-bold text-slate-700 mb-1 text-emerald-700">Validade Lote Inicial</label>
+                            <input type="date" id="prod_expiry" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-slate-700">
                         </div>
                     </div>
 
                     <div id="div_initial_qty" class="pt-2">
-                        <label class="block text-sm font-bold text-slate-700 mb-1">Estoque Inicial Atual (Qtd. Embalagens)</label>
-                        <input type="number" id="prod_initial_qty" min="0" step="1" placeholder="0" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-emerald-50">
+                        <label class="block text-sm font-bold text-slate-700 mb-1 text-emerald-700">Estoque Inicial Atual (Qtd)</label>
+                        <input type="number" id="prod_initial_qty" min="0" step="1" placeholder="0" class="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-emerald-50">
                     </div>
+                    
+                    <p class="text-xs text-slate-400 mt-2"><i class="ph-fill ph-info"></i> Dica: Para adicionar novos lotes com validades diferentes, salve o material e utilize a tela "Lançar Movimentação".</p>
+
                     <div class="pt-4 flex justify-end gap-3">
                         <button type="button" onclick="closeModal('modal-product')" class="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition-colors">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-colors flex items-center gap-2 shadow-sm">Salvar Material</button>
+                        <button type="submit" id="btn-submit-product" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-colors flex items-center gap-2 shadow-sm">Salvar Material</button>
                     </div>
                 </form>
             </div>
@@ -532,7 +544,7 @@
                     </div>
                     <div class="pt-4 flex justify-end gap-3">
                         <button type="button" onclick="closeModal('modal-person')" class="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition-colors">Cancelar</button>
-                        <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-colors flex items-center gap-2 shadow-sm">Salvar Cadastro</button>
+                        <button type="submit" id="btn-submit-person" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-colors flex items-center gap-2 shadow-sm">Salvar Cadastro</button>
                     </div>
                 </form>
             </div>
@@ -609,14 +621,23 @@
         </div>
     </div>
 
-
     <!-- ================= LOGICA ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ================= PWA SETUP (Permite Instalar como App) =================
+        // ================= FUNÇÕES UTILITÁRIAS =================
+        function formatNumber(num) { const n = parseFloat(num); if (isNaN(n)) return 0; return Number.isInteger(n) ? n : parseFloat(n.toFixed(2)); }
+        function formatDateBR(ds) { if(!ds) return ''; const [y, m, d] = ds.split('-'); return `${d}/${m}/${y}`; }
+        
+        // Pega data local garantida, evitando bug de fuso horário UTC (dia anterior/seguinte)
+        function getTodayLocal() {
+            const d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        // ================= PWA SETUP =================
         const setupPWA = () => {
             const manifest = {
                 name: "Sistema Integrado",
@@ -625,12 +646,7 @@
                 display: "standalone",
                 background_color: "#f8fafc",
                 theme_color: "#1e293b",
-                icons: [{
-                    src: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>",
-                    sizes: "192x192 512x512",
-                    type: "image/svg+xml",
-                    purpose: "any maskable"
-                }]
+                icons: [{ src: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>", sizes: "192x192 512x512", type: "image/svg+xml", purpose: "any maskable" }]
             };
             const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
             const manifestLink = document.createElement('link');
@@ -638,23 +654,15 @@
             manifestLink.href = URL.createObjectURL(manifestBlob);
             document.head.appendChild(manifestLink);
 
-            // Registo do Service Worker dinâmico (obrigatório para ativar o evento de instalação no Chrome)
             if ('serviceWorker' in navigator) {
                 const swCode = "self.addEventListener('install', (e) => { self.skipWaiting(); }); self.addEventListener('activate', (e) => { self.clients.claim(); }); self.addEventListener('fetch', (e) => { });";
                 const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                const swUrl = URL.createObjectURL(swBlob);
-                navigator.serviceWorker.register(swUrl).then(() => {
-                    console.log("PWA Service Worker registado com sucesso.");
-                }).catch((err) => {
-                    console.log("Nota: Registo do SW falhou. Em ambientes restritos (como iframes), o PWA pode não funcionar.", err);
-                });
+                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
             }
 
             let deferredPrompt;
             window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                // Exibe os botões de instalação
+                e.preventDefault(); deferredPrompt = e;
                 const btnDesk = document.getElementById('install-app-btn');
                 const btnMob = document.getElementById('install-app-btn-mobile');
                 if(btnDesk) { btnDesk.classList.remove('hidden'); btnDesk.classList.add('flex'); }
@@ -666,23 +674,18 @@
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
                     if (outcome === 'accepted') {
-                        // Oculta botões após instalar
                         const btnDesk = document.getElementById('install-app-btn');
                         const btnMob = document.getElementById('install-app-btn-mobile');
                         if(btnDesk) { btnDesk.classList.add('hidden'); btnDesk.classList.remove('flex'); }
                         if(btnMob) { btnMob.classList.add('hidden'); btnMob.classList.remove('flex'); }
                     }
                     deferredPrompt = null;
-                } else {
-                    showToast("A instalação não está disponível no momento ou o app já está instalado. Tente gravar o ficheiro no computador e abrir diretamente no Google Chrome ou Safari.", "error");
-                }
+                } else showToast("A instalação não está disponível.", "error");
             };
         };
         setupPWA();
 
         // ================= 1. CONFIGURAÇÃO DO FIREBASE =================
-        // PARA USAR NO SEU COMPUTADOR OU SERVIDOR:
-        // Preencha as aspas vazias com as chaves geradas no seu console do Firebase.
         let firebaseConfig = {
             apiKey: ["AIzaSyC7J_J7JCagM65E5qkl1z-Kn2V360", "ldmdg"].join(''),
             authDomain: ["minhas-credenciais-firebase", ".firebaseapp.com"].join(''),
@@ -692,17 +695,10 @@
             appId: ["1:90146495031:web:", "04bdab47de65f7444cbdb2"].join('')
         };
         
-        // Mantém compatibilidade automática se for rodado no ambiente deste chat
-        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-            firebaseConfig = JSON.parse(__firebase_config);
-        }
-        
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) firebaseConfig = JSON.parse(__firebase_config);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'estoque-unificado-app';
 
-        // ================= 2. INICIALIZAÇÃO SEGURA =================
         let app, auth, db;
-        
-        // Verifica se a API Key foi preenchida pelo usuário
         const isFirebaseConfigured = firebaseConfig && firebaseConfig.apiKey !== "";
 
         if (isFirebaseConfigured) {
@@ -721,29 +717,15 @@
         // ESTADO DE PAGINAÇÃO
         const ITEMS_PER_PAGE = 10;
         let pageState = { products: 1, people: 1, history: 1 };
-
-        // LISTENERS
         let unsubProducts = null, unsubMovements = null, unsubPeople = null;
 
-        // INICIALIZAÇÃO E AUTENTICAÇÃO SEGURA
+        // INICIALIZAÇÃO
         const initAuth = async () => {
-            if (!isFirebaseConfigured) {
-                updateConnectionStatus(false, "Sem Configuração");
-                showConfigWarning();
-                return;
-            }
-
+            if (!isFirebaseConfigured) { updateConnectionStatus(false, "Sem Configuração"); showConfigWarning(); return; }
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Auth error:", error);
-                updateConnectionStatus(false, "Erro de Permissão");
-                showToast("Falha no login. O Login Anônimo está ativado no Firebase?", "error");
-            }
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+                else await signInAnonymously(auth);
+            } catch (error) { updateConnectionStatus(false, "Erro de Permissão"); showToast("Falha no login.", "error"); }
         };
 
         if (isFirebaseConfigured) {
@@ -756,9 +738,7 @@
                     if(dInput) dInput.valueAsDate = new Date();
                 } else {
                     updateConnectionStatus(false);
-                    if(unsubProducts) unsubProducts();
-                    if(unsubMovements) unsubMovements();
-                    if(unsubPeople) unsubPeople();
+                    if(unsubProducts) unsubProducts(); if(unsubMovements) unsubMovements(); if(unsubPeople) unsubPeople();
                 }
             });
         }
@@ -773,9 +753,9 @@
             unsubProducts = onSnapshot(productsRef, (snapshot) => {
                 products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.name.localeCompare(b.name));
                 updateProductSelects();
+                updateHistoryFilterSelect();
                 if(document.getElementById('view-products').classList.contains('block')) renderProducts();
                 if(document.getElementById('view-dashboard').classList.contains('block')) renderDashboard();
-                if(document.getElementById('view-history').classList.contains('block')) updateHistoryFilterSelect();
             }, (error) => showToast("Erro ao sincronizar estoque.", "error"));
 
             unsubMovements = onSnapshot(movementsRef, (snapshot) => {
@@ -809,9 +789,7 @@
                     select.dispatchEvent(new Event('change'));
                     document.getElementById('mov_qty').focus(); 
                     showToast(`Produto selecionado: ${prod.name}`, "success");
-                } else {
-                    showToast("Código não cadastrado no sistema.", "error");
-                }
+                } else showToast("Código não cadastrado no sistema.", "error");
             }
         };
 
@@ -823,17 +801,14 @@
 
                 const prod = products.find(p => p.barcode === code);
                 if (prod) {
-                    if (prod.currentQty <= 0) {
-                        showToast(`Sem estoque para ${prod.name}`, "error");
-                    } else {
+                    if (prod.currentQty <= 0) showToast(`Sem estoque para ${prod.name}`, "error");
+                    else {
                         const select = document.getElementById('assign_product');
                         select.value = prod.id;
                         document.getElementById('assign_qty').focus();
                         showToast(`Pronto para entregar: ${prod.name}`, "success");
                     }
-                } else {
-                    showToast("Código não encontrado.", "error");
-                }
+                } else showToast("Código não encontrado.", "error");
             }
         };
 
@@ -852,24 +827,16 @@
             document.getElementById(`view-${viewId}`).classList.add('block');
 
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('text-slate-300', 'hover:bg-slate-800');
+                btn.classList.remove('bg-blue-600', 'text-white'); btn.classList.add('text-slate-300', 'hover:bg-slate-800');
             });
             const activeBtn = document.getElementById(`nav-${viewId}`);
-            if(activeBtn) {
-                activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-800');
-                activeBtn.classList.add('bg-blue-600', 'text-white');
-            }
+            if(activeBtn) { activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-800'); activeBtn.classList.add('bg-blue-600', 'text-white'); }
 
             document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
-                btn.classList.remove('text-blue-600');
-                btn.classList.add('text-slate-400');
+                btn.classList.remove('text-blue-600'); btn.classList.add('text-slate-400');
             });
             const activeBtnMobile = document.getElementById(`nav-mobile-${viewId}`);
-            if(activeBtnMobile) {
-                activeBtnMobile.classList.remove('text-slate-400');
-                activeBtnMobile.classList.add('text-blue-600');
-            }
+            if(activeBtnMobile) { activeBtnMobile.classList.remove('text-slate-400'); activeBtnMobile.classList.add('text-blue-600'); }
 
             if(viewId === 'dashboard') renderDashboard();
             if(viewId === 'products') renderProducts();
@@ -897,13 +864,15 @@
             if (!isFirebaseConfigured) return showToast("Configure o Firebase primeiro.", "error");
             if (!currentUser) return;
 
+            const btn = document.getElementById('btn-submit-product');
+            btn.disabled = true;
+
             const id = document.getElementById('prod_id').value;
             const barcode = document.getElementById('prod_barcode').value.trim();
             const name = document.getElementById('prod_name').value.trim();
             const category = document.getElementById('prod_category').value;
             const size = document.getElementById('prod_size').value.trim();
             
-            // Novos campos baseados em embalagem
             const unit = document.getElementById('prod_pack').value;
             const weight = parseFloat(document.getElementById('prod_weight').value) || 0;
             const weightUnit = document.getElementById('prod_weight_unit').value;
@@ -917,10 +886,13 @@
 
             if (barcode) {
                 const existing = products.find(p => p.barcode === barcode && p.id !== id);
-                if (existing) return showToast(`Código ${barcode} já em uso pelo item: ${existing.name}`, "error");
+                if (existing) {
+                    btn.disabled = false;
+                    return showToast(`Código ${barcode} já em uso pelo item: ${existing.name}`, "error");
+                }
             }
 
-            const data = { barcode, name, category, size, unit, weight, weightUnit, minQty: safeMinQty, expiryDate, updatedAt: new Date().toISOString() };
+            const data = { barcode, name, category, size, unit, weight, weightUnit, minQty: safeMinQty, updatedAt: new Date().toISOString() };
             const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
 
             try {
@@ -928,6 +900,12 @@
                     await updateDoc(doc(productsRef, id), data);
                     showToast("Material atualizado!", "success");
                 } else {
+                    // Novo produto: cria o array de LOTES (batches)
+                    let initialBatches = [];
+                    if (safeInitQty > 0) {
+                        initialBatches.push({ qty: safeInitQty, expiryDate: expiryDate || '' });
+                    }
+                    data.batches = initialBatches;
                     data.currentQty = safeInitQty;
                     data.createdAt = new Date().toISOString();
                     const docRef = await addDoc(productsRef, data);
@@ -936,8 +914,8 @@
                         const movementsRef = collection(db, 'artifacts', appId, 'public', 'data', 'movements');
                         await addDoc(movementsRef, {
                             productId: docRef.id, productName: name, type: 'in', qty: safeInitQty,
-                            date: new Date().toISOString().split('T')[0], note: 'Estoque Inicial (Cadastro)',
-                            userId: currentUser.uid, createdAt: new Date().toISOString()
+                            date: getTodayLocal(), note: 'Estoque Inicial (Cadastro)',
+                            batchExpiry: expiryDate || '', userId: currentUser.uid, createdAt: new Date().toISOString()
                         });
                     }
                     showToast("Material criado com sucesso!", "success");
@@ -945,6 +923,8 @@
                 closeModal('modal-product');
             } catch (error) {
                 showToast("Erro ao processar dados no banco.", "error");
+            } finally {
+                btn.disabled = false;
             }
         };
 
@@ -957,11 +937,116 @@
             });
         };
 
+        // ================= CRUD MOVIMENTOS AVULSOS =================
+        window.handleMovementSubmit = async (e) => {
+            e.preventDefault();
+            if (!isFirebaseConfigured) return showToast("Configure o Firebase primeiro.", "error");
+            if(!currentUser) return;
+
+            const btn = document.getElementById('btn-submit-movement');
+            btn.disabled = true;
+
+            const type = document.querySelector('input[name="mov_type"]:checked').value;
+            const productId = document.getElementById('mov_product').value;
+            const rawQty = parseInt(document.getElementById('mov_qty').value);
+            const date = document.getElementById('mov_date').value;
+            const note = document.getElementById('mov_note').value.trim();
+            const batchExpiry = document.getElementById('mov_batch_expiry') ? document.getElementById('mov_batch_expiry').value : '';
+
+            if(!productId || isNaN(rawQty) || rawQty <= 0) {
+                showToast("Confirme o produto e a quantidade inteira.", "error");
+                btn.disabled = false; return;
+            }
+
+            const product = products.find(p => p.id === productId);
+            if (!product) { btn.disabled = false; return; }
+
+            // Lógica de Lotes (FIFO / PEPS)
+            let batches = product.batches || [];
+            
+            // Fallback de migração para itens antigos antes do sistema de lotes
+            if (batches.length === 0 && product.currentQty > 0) {
+                batches.push({ qty: product.currentQty, expiryDate: product.expiryDate || '' });
+            }
+
+            let newQty = product.currentQty;
+            
+            if (type === 'out') {
+                if (rawQty > product.currentQty) {
+                    showToast(`Quantidade excede o disponível! Disp: ${formatNumber(product.currentQty)}`, "error");
+                    btn.disabled = false; return;
+                }
+                
+                // Ordena lotes: Perecíveis (Vencimento mais antigo) PRIMEIRO.
+                batches.sort((a,b) => {
+                    if(!a.expiryDate) return 1;
+                    if(!b.expiryDate) return -1;
+                    return new Date(a.expiryDate) - new Date(b.expiryDate);
+                });
+
+                let qtyToDeduct = rawQty;
+                for(let i=0; i<batches.length && qtyToDeduct > 0; i++) {
+                    if(batches[i].qty >= qtyToDeduct) {
+                        batches[i].qty -= qtyToDeduct;
+                        qtyToDeduct = 0;
+                    } else {
+                        qtyToDeduct -= batches[i].qty;
+                        batches[i].qty = 0;
+                    }
+                }
+                // Limpa lotes zerados
+                batches = batches.filter(b => b.qty > 0);
+                newQty -= rawQty;
+                
+            } else { 
+                // Entrada (in): Procura um lote com a mesma data ou cria um novo
+                const bIdx = batches.findIndex(b => (b.expiryDate || '') === (batchExpiry || ''));
+                if (bIdx >= 0) {
+                    batches[bIdx].qty += rawQty;
+                } else {
+                    batches.push({ qty: rawQty, expiryDate: batchExpiry || '' });
+                }
+                newQty += rawQty;
+            }
+
+            try {
+                // Salva no Histórico
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'movements'), {
+                    productId, productName: product.name, type, qty: rawQty, date, note,
+                    batchExpiry: type === 'in' ? (batchExpiry || '') : '',
+                    userId: currentUser.uid, createdAt: new Date().toISOString()
+                });
+                
+                // Atualiza Produto (Quantidade total e array de lotes)
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { 
+                    currentQty: newQty, batches 
+                });
+
+                showToast("Salvo com sucesso!", "success");
+                
+                document.getElementById('mov_barcode').value = '';
+                document.getElementById('mov_product').value = '';
+                document.getElementById('mov_qty').value = '';
+                document.getElementById('mov_note').value = '';
+                if(document.getElementById('mov_batch_expiry')) document.getElementById('mov_batch_expiry').value = '';
+                document.getElementById('mov_current_qty_hint').classList.add('hidden');
+                
+                document.getElementById('mov_barcode').focus(); 
+            } catch (e) {
+                showToast("Erro na comunicação com a nuvem.", "error");
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
         // ================= CRUD PESSOAS & CAUTELA =================
         window.handlePersonSubmit = async (e) => {
             e.preventDefault();
             if (!isFirebaseConfigured) return showToast("Configure o Firebase primeiro.", "error");
             if (!currentUser) return;
+
+            const btn = document.getElementById('btn-submit-person');
+            btn.disabled = true;
 
             const id = document.getElementById('pers_id').value;
             const name = document.getElementById('pers_name').value.trim();
@@ -972,23 +1057,15 @@
             const peopleRef = collection(db, 'artifacts', appId, 'public', 'data', 'people');
 
             try {
-                if (id) {
-                    await updateDoc(doc(peopleRef, id), data);
-                    showToast("Pessoa atualizada!", "success");
-                } else {
-                    data.assignedItems = [];
-                    data.createdAt = new Date().toISOString();
-                    await addDoc(peopleRef, data);
-                    showToast("Pessoa cadastrada com sucesso!", "success");
-                }
+                if (id) { await updateDoc(doc(peopleRef, id), data); showToast("Pessoa atualizada!", "success"); } 
+                else { data.assignedItems = []; data.createdAt = new Date().toISOString(); await addDoc(peopleRef, data); showToast("Pessoa cadastrada!", "success"); }
                 closeModal('modal-person');
-            } catch (error) {
-                showToast("Erro ao cadastrar.", "error");
-            }
+            } catch (error) { showToast("Erro ao cadastrar.", "error"); }
+            finally { btn.disabled = false; }
         };
 
         window.deletePerson = async (id, name) => {
-            if (!isFirebaseConfigured) return showToast("Configure o Firebase primeiro.", "error");
+            if (!isFirebaseConfigured) return showToast("Configure o Firebase.", "error");
             if(!currentUser) return;
             customConfirm(`Tem certeza que deseja excluir <b>${name}</b>?`, async () => {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'people', id));
@@ -1029,7 +1106,7 @@
 
         window.handleAssignSubmit = async (e) => {
             e.preventDefault();
-            if (!isFirebaseConfigured) return showToast("Configure o Firebase primeiro.", "error");
+            if (!isFirebaseConfigured) return showToast("Configure o Firebase.", "error");
             if (!currentUser || !activePersonId) return;
 
             const btn = document.getElementById('btn-assign');
@@ -1039,22 +1116,34 @@
             const rawQty = parseInt(document.getElementById('assign_qty').value);
             
             if(!productId || isNaN(rawQty) || rawQty <= 0) { 
-                showToast("Quantidade inválida.", "error"); 
-                btn.disabled = false; return; 
+                showToast("Quantidade inválida.", "error"); btn.disabled = false; return; 
             }
 
             const person = people.find(p => p.id === activePersonId);
             const product = products.find(p => p.id === productId);
 
-            if(!product) {
-                showToast("Erro: Produto não encontrado.", "error");
-                btn.disabled = false; return;
-            }
+            if(!product) { showToast("Erro: Produto não encontrado.", "error"); btn.disabled = false; return; }
+            if(rawQty > product.currentQty) { showToast(`Quantidade excede o disponível.`, "error"); btn.disabled = false; return; }
 
-            if(rawQty > product.currentQty) {
-                showToast(`Quantidade excede o disponível (${formatNumber(product.currentQty)}).`, "error");
-                btn.disabled = false; return;
+            // Deduz os lotes (FIFO) no caso de entrega para pessoas
+            let batches = product.batches || [];
+            if(batches.length === 0 && product.currentQty > 0) batches.push({qty: product.currentQty, expiryDate: product.expiryDate||''});
+            batches.sort((a,b) => {
+                if(!a.expiryDate) return 1;
+                if(!b.expiryDate) return -1;
+                return new Date(a.expiryDate) - new Date(b.expiryDate);
+            });
+            let qtyToDeduct = rawQty;
+            for(let i=0; i<batches.length && qtyToDeduct > 0; i++) {
+                if(batches[i].qty >= qtyToDeduct) {
+                    batches[i].qty -= qtyToDeduct;
+                    qtyToDeduct = 0;
+                } else {
+                    qtyToDeduct -= batches[i].qty;
+                    batches[i].qty = 0;
+                }
             }
+            batches = batches.filter(b => b.qty > 0);
 
             try {
                 const assignId = 'ca_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
@@ -1065,25 +1154,22 @@
 
                 const newAssignedList = [...(person.assignedItems || []), newItem];
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'people', activePersonId), { assignedItems: newAssignedList });
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { currentQty: product.currentQty - rawQty });
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { currentQty: product.currentQty - rawQty, batches });
 
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'movements'), {
                     productId, productName: product.name, type: 'out', qty: rawQty,
-                    date: new Date().toISOString().split('T')[0], note: `Cautelado p/ ${person.name}`,
+                    date: getTodayLocal(), note: `Cautelado p/ ${person.name}`,
                     userId: currentUser.uid, createdAt: new Date().toISOString()
                 });
 
                 showToast("Entregue com sucesso!", "success");
-                
                 document.getElementById('assign_barcode').value = '';
                 document.getElementById('assign_product').value = '';
                 document.getElementById('assign_qty').value = '1';
                 document.getElementById('assign_barcode').focus();
             } catch(e) {
                 showToast("Erro durante gravação da entrega.", "error");
-            } finally {
-                btn.disabled = false;
-            }
+            } finally { btn.disabled = false; }
         };
 
         window.returnItem = async (assignmentId) => {
@@ -1093,22 +1179,28 @@
             const assignment = person.assignedItems.find(a => a.id === assignmentId);
             if(!assignment) return;
 
-            customConfirm(`Deseja confirmar a devolução de <b>${formatNumber(assignment.qty)}x ${assignment.productName}</b>?`, async () => {
+            customConfirm(`Confirmar devolução de <b>${formatNumber(assignment.qty)}x ${assignment.productName}</b>?`, async () => {
                 try {
                     const newAssignedList = person.assignedItems.filter(a => a.id !== assignmentId);
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'people', activePersonId), { assignedItems: newAssignedList });
 
                     const pDoc = products.find(p => p.id === assignment.productId);
                     if(pDoc) {
+                        // Devolve o material para o estoque num lote sem validade específica (ou genérico)
+                        let batches = pDoc.batches || [];
+                        const bIdx = batches.findIndex(b => (b.expiryDate || '') === '');
+                        if (bIdx >= 0) batches[bIdx].qty += assignment.qty;
+                        else batches.push({ qty: assignment.qty, expiryDate: '' });
+
                         const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', assignment.productId);
-                        await updateDoc(productRef, { currentQty: pDoc.currentQty + assignment.qty });
+                        await updateDoc(productRef, { currentQty: pDoc.currentQty + assignment.qty, batches });
                     } else {
                         showToast("Nota: Item já foi excluído do sistema geral, registrado apenas no histórico.", "success");
                     }
 
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'movements'), {
                         productId: assignment.productId, productName: assignment.productName, type: 'in', qty: assignment.qty,
-                        date: new Date().toISOString().split('T')[0], note: `Devolvido por ${person.name}`,
+                        date: getTodayLocal(), note: `Devolvido por ${person.name}`,
                         userId: currentUser.uid, createdAt: new Date().toISOString()
                     });
 
@@ -1122,14 +1214,11 @@
         function renderAssignedItems(person) {
             const tbody = document.getElementById('assigned-items-body');
             const items = person.assignedItems || [];
-            
             if(items.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Nenhum material pendente de devolução.</td></tr>`;
                 return;
             }
-
             const sortedItems = [...items].sort((a,b) => new Date(b.assignedAt) - new Date(a.assignedAt));
-
             tbody.innerHTML = sortedItems.map(item => `
                 <tr class="hover:bg-slate-50 transition-colors">
                     <td class="px-4 py-3 font-bold text-slate-800">${item.productName} ${item.productSize ? `<span class="bg-slate-200 text-slate-600 text-[10px] px-1.5 py-0.5 rounded ml-1">${item.productSize}</span>` : ''}</td>
@@ -1144,61 +1233,6 @@
             `).join('');
         }
 
-        // ================= CRUD MOVIMENTOS AVULSOS =================
-        window.handleMovementSubmit = async (e) => {
-            e.preventDefault();
-            if (!isFirebaseConfigured) return showToast("Configure o Firebase primeiro.", "error");
-            if(!currentUser) return;
-
-            const btn = document.getElementById('btn-submit-movement');
-            btn.disabled = true;
-
-            const type = document.querySelector('input[name="mov_type"]:checked').value;
-            const productId = document.getElementById('mov_product').value;
-            const rawQty = parseInt(document.getElementById('mov_qty').value);
-            const date = document.getElementById('mov_date').value;
-            const note = document.getElementById('mov_note').value.trim();
-
-            if(!productId || isNaN(rawQty) || rawQty <= 0) {
-                showToast("Confirme o produto e a quantidade inteira.", "error");
-                btn.disabled = false; return;
-            }
-
-            const product = products.find(p => p.id === productId);
-            if (!product) { btn.disabled = false; return; }
-
-            let newQty = product.currentQty;
-            if (type === 'out') {
-                if (rawQty > product.currentQty) {
-                    showToast(`Quantidade excede o disponível! Disp: ${formatNumber(product.currentQty)}`, "error");
-                    btn.disabled = false; return;
-                }
-                newQty -= rawQty;
-            } else { newQty += rawQty; }
-
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'movements'), {
-                    productId, productName: product.name, type, qty: rawQty, date, note,
-                    userId: currentUser.uid, createdAt: new Date().toISOString()
-                });
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), { currentQty: newQty });
-
-                showToast("Salvo com sucesso!", "success");
-                
-                document.getElementById('mov_barcode').value = '';
-                document.getElementById('mov_product').value = '';
-                document.getElementById('mov_qty').value = '';
-                document.getElementById('mov_note').value = '';
-                document.getElementById('mov_current_qty_hint').classList.add('hidden');
-                
-                document.getElementById('mov_barcode').focus(); 
-            } catch (e) {
-                showToast("Erro na comunicação com a nuvem.", "error");
-            } finally {
-                btn.disabled = false;
-            }
-        };
-
         // ================= RENDERIZADORES =================
         function renderDashboard() {
             document.getElementById('dash-total-products').innerText = formatNumber(products.reduce((acc, p) => acc + p.currentQty, 0));
@@ -1210,36 +1244,54 @@
 
             const lowStock = products.filter(p => p.currentQty <= p.minQty);
             
+            // Nova Lógica de Alertas focada em Lotes (Batches) individuais
             const today = new Date();
             today.setHours(0,0,0,0);
             
-            const expiringSoon = products.filter(p => {
-                if(!p.expiryDate || p.currentQty <= 0) return false;
-                const exp = new Date(p.expiryDate);
-                exp.setHours(23,59,59,999);
-                const diffTime = exp - today;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays <= 30;
-            }).map(p => {
-                const exp = new Date(p.expiryDate);
-                const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
-                return { ...p, diffDays };
-            }).sort((a,b) => a.diffDays - b.diffDays);
+            let expiringBatches = [];
+            
+            products.forEach(p => {
+                let pBatches = p.batches || [];
+                // Fallback legado se não houver lotes
+                if (pBatches.length === 0 && p.currentQty > 0 && p.expiryDate) {
+                    pBatches.push({ qty: p.currentQty, expiryDate: p.expiryDate });
+                }
+                
+                pBatches.forEach(b => {
+                    if (b.expiryDate && b.qty > 0) {
+                        const exp = new Date(b.expiryDate);
+                        exp.setHours(23,59,59,999);
+                        const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+                        if (diffDays <= 30) {
+                            expiringBatches.push({ 
+                                ...p, 
+                                batchQty: b.qty, 
+                                batchExpiry: b.expiryDate, 
+                                diffDays 
+                            });
+                        }
+                    }
+                });
+            });
 
-            document.getElementById('dash-low-stock').innerText = lowStock.length + expiringSoon.length;
+            expiringBatches.sort((a,b) => a.diffDays - b.diffDays);
+            document.getElementById('dash-low-stock').innerText = lowStock.length + expiringBatches.length;
             
             const alertsCont = document.getElementById('dash-alerts-container');
             let alertsHtml = '';
 
-            if (expiringSoon.length > 0) {
-                alertsHtml += `<div class="px-5 py-2 bg-amber-50 text-amber-700 font-bold text-xs uppercase tracking-wider sticky top-0 z-10 backdrop-blur-sm">⚠️ Validade Crítica (<= 30 dias)</div>`;
-                alertsHtml += expiringSoon.map(p => {
-                    const isExpired = p.diffDays < 0;
-                    const statusText = isExpired ? `Vencido há ${Math.abs(p.diffDays)} dias` : (p.diffDays === 0 ? 'Vence hoje' : `Vence em ${p.diffDays} dias`);
+            if (expiringBatches.length > 0) {
+                alertsHtml += `<div class="px-5 py-2 bg-amber-50 text-amber-700 font-bold text-xs uppercase tracking-wider sticky top-0 z-10 backdrop-blur-sm">⚠️ Lotes com Validade Crítica (<= 30 dias)</div>`;
+                alertsHtml += expiringBatches.map(b => {
+                    const isExpired = b.diffDays < 0;
+                    const statusText = isExpired ? `Vencido há ${Math.abs(b.diffDays)} dias` : (b.diffDays === 0 ? 'Vence hoje' : `Vence em ${b.diffDays} dias`);
                     const statusColor = isExpired ? 'bg-red-100 text-red-700 border-red-200' : 'bg-amber-100 text-amber-700 border-amber-200';
                     return `
                     <div class="p-4 border-b border-slate-50 flex justify-between items-center hover:bg-slate-50">
-                        <div class="min-w-0 pr-3"><p class="font-bold text-slate-800 text-sm truncate">${p.name}</p><p class="text-[10px] uppercase font-bold text-slate-400 mt-0.5">Disp: ${formatNumber(p.currentQty)} ${p.unit}</p></div>
+                        <div class="min-w-0 pr-3">
+                            <p class="font-bold text-slate-800 text-sm truncate">${b.name}</p>
+                            <p class="text-[10px] uppercase font-bold text-slate-400 mt-0.5">Lote: ${formatNumber(b.batchQty)} ${b.unit} | Val: ${formatDateBR(b.batchExpiry)}</p>
+                        </div>
                         <span class="px-2 py-1 rounded text-[10px] font-bold border ${statusColor} whitespace-nowrap">${statusText}</span>
                     </div>`;
                 }).join('');
@@ -1250,21 +1302,17 @@
                 alertsHtml += lowStock.map(p => `
                     <div class="p-4 border-b border-slate-50 flex justify-between items-center hover:bg-slate-50">
                         <div class="min-w-0 pr-3"><p class="font-bold text-slate-800 text-sm truncate">${p.name} ${p.size?`(${p.size})`:''}</p><p class="text-[10px] uppercase font-bold text-slate-400 mt-0.5">Mínimo: ${formatNumber(p.minQty)} ${p.unit}</p></div>
-                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px] font-bold border border-red-200 whitespace-nowrap">Atual: ${formatNumber(p.currentQty)}</span>
+                        <span class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px] font-bold border border-red-200 whitespace-nowrap">Total Disp: ${formatNumber(p.currentQty)}</span>
                     </div>`).join('');
             }
 
-            if(alertsHtml === '') {
-                alertsCont.innerHTML = `<div class="p-6 text-center text-slate-400"><i class="ph ph-smiley text-3xl mb-2"></i><br>Estoque e validades estabilizados.</div>`;
-            } else {
-                alertsCont.innerHTML = alertsHtml;
-            }
+            if(alertsHtml === '') alertsCont.innerHTML = `<div class="p-6 text-center text-slate-400"><i class="ph ph-smiley text-3xl mb-2"></i><br>Estoque e validades estabilizados.</div>`;
+            else alertsCont.innerHTML = alertsHtml;
 
             const recent = movements.slice(0, 10);
             const histCont = document.getElementById('dash-latest-movements');
-            if(recent.length === 0) {
-                histCont.innerHTML = `<div class="p-6 text-center text-slate-400">Nenhum registro.</div>`;
-            } else {
+            if(recent.length === 0) histCont.innerHTML = `<div class="p-6 text-center text-slate-400">Nenhum registro.</div>`;
+            else {
                 histCont.innerHTML = recent.map(m => {
                     const isEntry = m.type === 'in';
                     return `
@@ -1284,7 +1332,7 @@
             }
         }
 
-        // MOTOR DE BUSCA INTELIGENTE
+        // MOTOR DE BUSCA INTELIGENTE APRIMORADO
         function smartSearch(text, query) {
             if (!query) return true;
             if (text === undefined || text === null) return false;
@@ -1304,30 +1352,17 @@
             const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
             const currentPage = pageState[type];
 
-            if (totalItems <= ITEMS_PER_PAGE) {
-                container.classList.add('hidden');
-                container.classList.remove('flex');
-                return;
-            }
-
-            container.classList.remove('hidden');
-            container.classList.add('flex');
-
+            if (totalItems <= ITEMS_PER_PAGE) { container.classList.add('hidden'); container.classList.remove('flex'); return; }
+            container.classList.remove('hidden'); container.classList.add('flex');
             const startIdx = ((currentPage - 1) * ITEMS_PER_PAGE) + 1;
             const endIdx = Math.min(currentPage * ITEMS_PER_PAGE, totalItems);
 
             container.innerHTML = `
-                <span class="text-sm text-slate-500 font-medium text-center sm:text-left">
-                    Mostrando <b>${startIdx}</b> a <b>${endIdx}</b> de <b>${totalItems}</b> registros
-                </span>
+                <span class="text-sm text-slate-500 font-medium text-center sm:text-left">Mostrando <b>${startIdx}</b> a <b>${endIdx}</b> de <b>${totalItems}</b> registros</span>
                 <div class="flex items-center gap-2">
-                    <button onclick="changePage('${type}', ${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''} class="p-2 rounded-lg border border-slate-300 bg-white text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 transition-all flex items-center justify-center">
-                        <i class="ph-bold ph-caret-left"></i>
-                    </button>
+                    <button onclick="changePage('${type}', ${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''} class="p-2 rounded-lg border border-slate-300 bg-white text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 transition-all flex items-center justify-center"><i class="ph-bold ph-caret-left"></i></button>
                     <span class="px-4 py-2 font-bold text-slate-700 bg-white border border-slate-200 rounded-lg text-sm">Pág ${currentPage} de ${totalPages}</span>
-                    <button onclick="changePage('${type}', ${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''} class="p-2 rounded-lg border border-slate-300 bg-white text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 transition-all flex items-center justify-center">
-                        <i class="ph-bold ph-caret-right"></i>
-                    </button>
+                    <button onclick="changePage('${type}', ${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''} class="p-2 rounded-lg border border-slate-300 bg-white text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 transition-all flex items-center justify-center"><i class="ph-bold ph-caret-right"></i></button>
                 </div>
             `;
         }
@@ -1338,18 +1373,37 @@
             const sortMethod = document.getElementById('sort-products') ? document.getElementById('sort-products').value : 'name';
             
             let filtered = products.filter(p => 
-                smartSearch(p.name, search) || 
-                smartSearch(p.category, search) || 
-                smartSearch(p.size, search) ||
-                smartSearch(p.barcode, search)
+                smartSearch(p.name, search) || smartSearch(p.category, search) || smartSearch(p.size, search) || smartSearch(p.barcode, search)
             );
+
+            // Preparação dos lotes para encontrar o vencimento mais próximo
+            const today = new Date(); today.setHours(0,0,0,0);
+            
+            filtered.forEach(p => {
+                let pBatches = p.batches || [];
+                if(pBatches.length === 0 && p.expiryDate && p.currentQty > 0) pBatches.push({qty: p.currentQty, expiryDate: p.expiryDate});
+                
+                p.nearestExpiry = null;
+                p.minDiffDays = Infinity;
+                
+                pBatches.forEach(b => {
+                    if(b.expiryDate && b.qty > 0) {
+                        const exp = new Date(b.expiryDate); exp.setHours(23,59,59,999);
+                        const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+                        if(diffDays < p.minDiffDays) {
+                            p.minDiffDays = diffDays;
+                            p.nearestExpiry = b.expiryDate;
+                        }
+                    }
+                });
+            });
 
             if (sortMethod === 'expiry') {
                 filtered.sort((a, b) => {
-                    if (!a.expiryDate && !b.expiryDate) return 0;
-                    if (!a.expiryDate) return 1;
-                    if (!b.expiryDate) return -1;
-                    return new Date(a.expiryDate) - new Date(b.expiryDate);
+                    if (!a.nearestExpiry && !b.nearestExpiry) return 0;
+                    if (!a.nearestExpiry) return 1;
+                    if (!b.nearestExpiry) return -1;
+                    return new Date(a.nearestExpiry) - new Date(b.nearestExpiry);
                 });
             } else {
                 filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -1370,18 +1424,17 @@
             
             tbody.innerHTML = paginated.map(p => {
                 const isLow = p.currentQty <= p.minQty;
-                
                 let expiryHtml = '<span class="text-slate-400">-</span>';
-                if (p.expiryDate) {
-                    const today = new Date(); today.setHours(0,0,0,0);
-                    const exp = new Date(p.expiryDate); exp.setHours(23,59,59,999);
-                    const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
-                    
+                
+                if (p.nearestExpiry) {
                     let colorClass = "text-slate-600 bg-slate-100 border-slate-200";
-                    if (diffDays < 0) colorClass = "text-red-700 bg-red-100 border-red-200";
-                    else if (diffDays <= 30) colorClass = "text-amber-700 bg-amber-100 border-amber-200";
+                    if (p.minDiffDays < 0) colorClass = "text-red-700 bg-red-100 border-red-200";
+                    else if (p.minDiffDays <= 30) colorClass = "text-amber-700 bg-amber-100 border-amber-200";
+                    
+                    const activeBatchesCount = (p.batches||[]).filter(b => b.qty > 0 && b.expiryDate).length;
+                    const multIndicator = activeBatchesCount > 1 ? `<div class="text-[9px] text-slate-400 mt-1">Lote próx. (${activeBatchesCount} lotes)</div>` : '';
 
-                    expiryHtml = `<span class="px-2 py-0.5 rounded border text-[10px] uppercase tracking-wider font-bold ${colorClass} whitespace-nowrap">${formatDateBR(p.expiryDate)}</span>`;
+                    expiryHtml = `<div class="flex flex-col items-center"><span class="px-2 py-0.5 rounded border text-[10px] uppercase tracking-wider font-bold ${colorClass} whitespace-nowrap">${formatDateBR(p.nearestExpiry)}</span>${multIndicator}</div>`;
                 }
 
                 let weightHtml = '';
@@ -1393,7 +1446,7 @@
                 return `
                 <tr class="hover:bg-slate-50 transition-colors group">
                     <td class="p-4 border-b border-slate-50 pl-6">
-                        <div class="font-bold text-slate-800">${p.name}</div>
+                        <div class="font-bold text-slate-800 max-w-[200px] sm:max-w-[300px] truncate" title="${p.name}">${p.name}</div>
                         <div class="text-[10px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
                             ${p.barcode ? `<span><i class="ph ph-barcode"></i> ${p.barcode}</span>` : ''}
                             ${p.barcode && p.size ? '<span class="mx-1">•</span>' : ''}
@@ -1407,7 +1460,7 @@
                         ${weightHtml}
                     </td>
                     <td class="p-4 border-b border-slate-50 text-right pr-6">
-                        <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="p-1.5 text-blue-500 hover:bg-blue-50 rounded" title="Editar"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
+                        <button onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="p-1.5 text-blue-500 hover:bg-blue-50 rounded" title="Editar Informações Básicas"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
                         <button onclick="deleteProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}')" class="p-1.5 text-red-500 hover:bg-red-50 rounded" title="Excluir"><i class="ph-bold ph-trash text-lg"></i></button>
                     </td>
                 </tr>`;
@@ -1420,12 +1473,7 @@
             const grid = document.getElementById('people-grid');
             const search = document.getElementById('search-person').value;
             
-            const filtered = people.filter(p => 
-                smartSearch(p.name, search) || 
-                smartSearch(p.role, search) || 
-                smartSearch(p.post, search)
-            );
-
+            const filtered = people.filter(p => smartSearch(p.name, search) || smartSearch(p.role, search) || smartSearch(p.post, search));
             const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
             if (pageState.people > totalPages) pageState.people = totalPages;
             if (pageState.people < 1) pageState.people = 1;
@@ -1476,18 +1524,28 @@
                     </div>
                 </div>`;
             }).join('');
-
             renderPaginationControls('people', filtered.length, 'pagination-people');
         }
 
+        // FUNÇÃO DE FILTRO DO HISTÓRICO COM TEXTO PARCIAL E CÓDIGO
         function getFilteredHistory() {
-            const fProd = document.getElementById('filter-history-product').value;
+            const fProdRaw = document.getElementById('filter-history-product').value.trim();
             const fType = document.getElementById('filter-history-type').value;
             const fStart = document.getElementById('filter-history-start').value;
             const fEnd = document.getElementById('filter-history-end').value;
 
             let filtered = movements;
-            if(fProd) filtered = filtered.filter(m => m.productId === fProd);
+            if(fProdRaw) {
+                // Procura um produto exato (nome exato ou código de barras)
+                const matchedProd = products.find(p => (p.barcode && p.barcode.toLowerCase() === fProdRaw.toLowerCase()) || p.name.toLowerCase() === fProdRaw.toLowerCase());
+                
+                if (matchedProd) {
+                    filtered = filtered.filter(m => m.productId === matchedProd.id);
+                } else {
+                    // Busca parcial se não achou código de barras exato
+                    filtered = filtered.filter(m => smartSearch(m.productName, fProdRaw));
+                }
+            }
             if(fType) filtered = filtered.filter(m => m.type === fType);
             if(fStart) filtered = filtered.filter(m => m.date >= fStart);
             if(fEnd) filtered = filtered.filter(m => m.date <= fEnd);
@@ -1527,7 +1585,6 @@
                     <td class="p-4 pr-6 text-xs text-slate-500 max-w-[200px] truncate" title="${m.note}">${m.note || '-'}</td>
                 </tr>`;
             }).join('');
-
             renderPaginationControls('history', filtered.length, 'pagination-history');
         }
 
@@ -1535,66 +1592,54 @@
         window.exportPDF = (type) => {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
-            doc.setFont("helvetica");
-            doc.setFontSize(16);
+            doc.setFont("helvetica"); doc.setFontSize(16);
             
             if (type === 'products') {
                 doc.text("Relatório Geral de Estoque", 14, 15);
-                doc.setFontSize(10);
-                doc.setTextColor(100);
+                doc.setFontSize(10); doc.setTextColor(100);
                 doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 22);
 
+                const today = new Date(); today.setHours(0,0,0,0);
                 const tableColumn = ["Código", "Descrição", "Categoria", "Validade", "Quantidade Total"];
                 const tableRows = products.map(p => {
-                    const validade = p.expiryDate ? formatDateBR(p.expiryDate) : '-';
+                    let pBatches = p.batches || [];
+                    if(pBatches.length === 0 && p.expiryDate && p.currentQty > 0) pBatches.push({qty: p.currentQty, expiryDate: p.expiryDate});
+                    let nearest = null; let minDiff = Infinity;
+                    pBatches.forEach(b => {
+                        if(b.expiryDate && b.qty > 0) {
+                            const diff = new Date(b.expiryDate) - today;
+                            if(diff < minDiff) { minDiff = diff; nearest = b.expiryDate; }
+                        }
+                    });
+                    const validade = nearest ? formatDateBR(nearest) : '-';
                     const qtyBase = `${formatNumber(p.currentQty)} ${p.unit||''}`;
                     const qtyTotal = (p.weight > 0 && p.weightUnit) ? `${qtyBase} (${formatNumber(p.currentQty * p.weight)} ${p.weightUnit})` : qtyBase;
                     return [p.barcode || '-', p.name || '-', p.category || '-', validade, qtyTotal];
                 });
 
-                doc.autoTable({
-                    head: [tableColumn], body: tableRows, startY: 28,
-                    styles: { fontSize: 9, cellPadding: 3, valign: 'middle' },
-                    headStyles: { fillColor: [37, 99, 235] },
-                    columnStyles: { 2: { cellWidth: 80 } }
-                });
-                doc.save(`relatorio_estoque_${Date.now()}.pdf`);
-                showToast("PDF de Estoque Gerado!", "success");
+                doc.autoTable({ head: [tableColumn], body: tableRows, startY: 28, styles: { fontSize: 9, cellPadding: 3, valign: 'middle' }, headStyles: { fillColor: [37, 99, 235] }, columnStyles: { 2: { cellWidth: 80 } } });
+                doc.save(`relatorio_estoque_${Date.now()}.pdf`); showToast("PDF de Estoque Gerado!", "success");
 
             } else if (type === 'people') {
                 doc.text("Relatório de Efetivo e Materiais Cautelados", 14, 15);
-                doc.setFontSize(10);
-                doc.setTextColor(100);
+                doc.setFontSize(10); doc.setTextColor(100);
                 doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 22);
 
                 const tableColumn = ["Nome", "Cargo / Posto", "Itens Vinculados (Cautela)"];
                 const tableRows = people.map(p => {
                     const itemsStr = (p.assignedItems && p.assignedItems.length > 0)
-                        ? p.assignedItems.map(i => `${formatNumber(i.qty)}x ${i.productName} ${i.productSize?`(${i.productSize})`:''}`).join('\n')
-                        : 'Nenhum item vinculado';
+                        ? p.assignedItems.map(i => `${formatNumber(i.qty)}x ${i.productName} ${i.productSize?`(${i.productSize})`:''}`).join('\n') : 'Nenhum item vinculado';
                     return [p.name || '-', `${p.role||'-'}\n${p.post||'-'}`, itemsStr];
                 });
 
-                doc.autoTable({
-                    head: [tableColumn], body: tableRows, startY: 28,
-                    styles: { fontSize: 9, cellPadding: 3, valign: 'middle' },
-                    headStyles: { fillColor: [37, 99, 235] },
-                    columnStyles: { 2: { cellWidth: 80 } }
-                });
-                doc.save(`relatorio_pessoas_${Date.now()}.pdf`);
-                showToast("PDF de Pessoas Gerado!", "success");
+                doc.autoTable({ head: [tableColumn], body: tableRows, startY: 28, styles: { fontSize: 9, cellPadding: 3, valign: 'middle' }, headStyles: { fillColor: [37, 99, 235] }, columnStyles: { 2: { cellWidth: 80 } } });
+                doc.save(`relatorio_pessoas_${Date.now()}.pdf`); showToast("PDF de Pessoas Gerado!", "success");
             } else if (type === 'history') {
                 const filtered = getFilteredHistory();
-                
-                if(filtered.length === 0) {
-                    showToast("Nenhum dado para exportar neste período/filtro.", "error");
-                    return;
-                }
+                if(filtered.length === 0) { showToast("Nenhum dado para exportar.", "error"); return; }
 
                 doc.text("Relatório de Movimentações (Histórico)", 14, 15);
-                doc.setFontSize(10);
-                doc.setTextColor(100);
+                doc.setFontSize(10); doc.setTextColor(100);
                 
                 const fStart = document.getElementById('filter-history-start').value;
                 const fEnd = document.getElementById('filter-history-end').value;
@@ -1612,61 +1657,35 @@
                     return [formatDateBR(m.date), tipoStr, m.productName || '-', qtyStr, m.note || '-'];
                 });
 
-                doc.autoTable({
-                    head: [tableColumn], body: tableRows, startY: 28,
-                    styles: { fontSize: 9, cellPadding: 3 },
-                    headStyles: { fillColor: [71, 85, 105] } 
-                });
-                doc.save(`relatorio_historico_${Date.now()}.pdf`);
-                showToast("PDF de Histórico Gerado!", "success");
+                doc.autoTable({ head: [tableColumn], body: tableRows, startY: 28, styles: { fontSize: 9, cellPadding: 3 }, headStyles: { fillColor: [71, 85, 105] } });
+                doc.save(`relatorio_historico_${Date.now()}.pdf`); showToast("PDF de Histórico Gerado!", "success");
             }
         };
 
         // ================= FUNÇÕES DE BACKUP OFFLINE =================
         window.exportBackup = () => {
-            if (!products.length && !people.length && !movements.length) {
-                showToast("Não há dados para fazer backup.", "error");
-                return;
-            }
-            
-            const backupData = {
-                products, people, movements,
-                exportDate: new Date().toISOString(), version: "2.1"
-            };
-            
-            const dataStr = JSON.stringify(backupData, null, 2);
-            const blob = new Blob([dataStr], { type: "text/plain" });
-            const url = URL.createObjectURL(blob);
+            if (!products.length && !people.length && !movements.length) { showToast("Não há dados para backup.", "error"); return; }
+            const backupData = { products, people, movements, exportDate: new Date().toISOString(), version: "2.3" };
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: "text/plain" });
             const link = document.createElement('a');
-            
             link.download = `backup_integrado_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.txt`;
-            link.href = url;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
+            link.href = URL.createObjectURL(blob);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
             showToast("Backup offline (.txt) gerado com sucesso!", "success");
         };
 
         window.handleFileChange = (event) => {
             const file = event.target.files[0];
             if (!file) return;
-            if (!isFirebaseConfigured) {
-                showToast("Você precisa configurar o Firebase antes de restaurar um backup.", "error");
-                event.target.value = null;
-                return;
-            }
+            if (!isFirebaseConfigured) { showToast("Configure o Firebase primeiro.", "error"); event.target.value = null; return; }
             
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
                     const importedData = JSON.parse(e.target.result);
-                    
-                    if (!importedData.products && !importedData.people && !importedData.inventory && !importedData.employees && !Array.isArray(importedData)) {
-                        throw new Error("Formato inválido");
-                    }
+                    if (!importedData.products && !importedData.people && !importedData.inventory && !importedData.employees && !Array.isArray(importedData)) throw new Error("Formato inválido");
 
-                    customConfirm("Atenção: A restauração fará a mescla com o banco atual. Confirmar?", async () => {
+                    customConfirm("A restauração fará a mescla com o banco atual. Confirmar?", async () => {
                         showToast("Restaurando backup, aguarde...", "success");
                         try {
                             const restoreCollection = async (colName, items) => {
@@ -1676,41 +1695,13 @@
                                     if (id) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', colName, id), data);
                                 }
                             };
-
-                            let prodsToRestore = importedData.products || [];
-                            let peopleToRestore = importedData.people || [];
-                            const movsToRestore = importedData.movements || [];
-
-                            if (importedData.inventory && !importedData.products) {
-                                prodsToRestore = importedData.inventory.map(i => ({
-                                    id: i.id, barcode: i.barcode || '', name: i.name, category: i.type || 'Fardamento',
-                                    size: i.size || '', unit: 'un', minQty: 5, currentQty: i.quantity || 0,
-                                    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
-                                }));
-                            }
-                            if (importedData.employees && !importedData.people) {
-                                peopleToRestore = importedData.employees.map(emp => ({
-                                    id: emp.id, name: emp.name, role: emp.role || '', post: emp.post || '',
-                                    assignedItems: (emp.uniforms || []).map(u => ({
-                                        id: u.id, productId: 'item_migrado_antigo', productName: u.type,
-                                        productSize: u.size, qty: u.quantity, unit: 'un', assignedAt: u.assignedAt || new Date().toISOString()
-                                    })),
-                                    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
-                                }));
-                            }
-
-                            await restoreCollection('products', prodsToRestore);
-                            await restoreCollection('people', peopleToRestore);
-                            await restoreCollection('movements', movsToRestore);
-                            
+                            await restoreCollection('products', importedData.products || []);
+                            await restoreCollection('people', importedData.people || []);
+                            await restoreCollection('movements', importedData.movements || []);
                             showToast("Backup restaurado e sincronizado com sucesso!", "success");
-                        } catch (err) {
-                            showToast("Erro durante gravação no banco online.", "error");
-                        }
+                        } catch (err) { showToast("Erro durante gravação no banco online.", "error"); }
                     });
-                } catch (error) {
-                    showToast("Erro ao ler o arquivo. Certifique-se de que é um backup válido.", "error");
-                }
+                } catch (error) { showToast("Erro ao ler o arquivo válido.", "error"); }
                 event.target.value = null;
             };
             reader.readAsText(file);
@@ -1718,11 +1709,14 @@
 
         // ================= UTILITÁRIOS E UI =================
         document.getElementById('search-product').addEventListener('input', () => { pageState.products = 1; renderProducts(); });
-        if(document.getElementById('sort-products')) {
-            document.getElementById('sort-products').addEventListener('change', () => { pageState.products = 1; renderProducts(); });
-        }
+        if(document.getElementById('sort-products')) document.getElementById('sort-products').addEventListener('change', () => { pageState.products = 1; renderProducts(); });
         document.getElementById('search-person').addEventListener('input', () => { pageState.people = 1; renderPeople(); });
-        document.getElementById('filter-history-product').addEventListener('change', () => { pageState.history = 1; renderHistory(); });
+        
+        // Listener unificado para filtro de histórico para capturar digitação ou enter
+        const histProductInput = document.getElementById('filter-history-product');
+        histProductInput.addEventListener('input', () => { pageState.history = 1; renderHistory(); });
+        histProductInput.addEventListener('change', () => { pageState.history = 1; renderHistory(); });
+        
         document.getElementById('filter-history-type').addEventListener('change', () => { pageState.history = 1; renderHistory(); });
         document.getElementById('filter-history-start').addEventListener('change', () => { pageState.history = 1; renderHistory(); });
         document.getElementById('filter-history-end').addEventListener('change', () => { pageState.history = 1; renderHistory(); });
@@ -1747,28 +1741,34 @@
                     const isOut = document.querySelector('input[name="mov_type"]:checked').value === 'out';
                     if(isOut) document.getElementById('mov_qty').max = p.currentQty;
                     else document.getElementById('mov_qty').removeAttribute('max');
-                } else {
-                    hint.classList.add('hidden');
-                }
+                } else hint.classList.add('hidden');
             });
         }
 
         function updateHistoryFilterSelect() {
-            const select = document.getElementById('filter-history-product');
-            const currentVal = select.value;
-            select.innerHTML = '<option value="">Todos os Materiais</option>' + products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-            select.value = currentVal;
+            const datalist = document.getElementById('history-products-list');
+            if(!datalist) return;
+            let optionsHTML = '';
+            products.forEach(p => {
+                optionsHTML += `<option value="${p.name}">${p.barcode ? 'Cód: ' + p.barcode : ''}</option>`;
+                if (p.barcode) optionsHTML += `<option value="${p.barcode}">${p.name}</option>`;
+            });
+            datalist.innerHTML = optionsHTML;
         }
 
         window.updateMovementFormUI = () => {
             const isEntry = document.querySelector('input[name="mov_type"]:checked').value === 'in';
             const btn = document.getElementById('btn-submit-movement');
+            const batchExpiryDiv = document.getElementById('mov_expiry_div');
+            
             if(isEntry) {
                 btn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
                 btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+                if(batchExpiryDiv) batchExpiryDiv.classList.remove('opacity-0', 'pointer-events-none', 'hidden');
             } else {
                 btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
                 btn.classList.add('bg-amber-600', 'hover:bg-amber-700');
+                if(batchExpiryDiv) batchExpiryDiv.classList.add('opacity-0', 'pointer-events-none', 'hidden');
             }
         };
 
@@ -1778,6 +1778,7 @@
             document.getElementById('prod_expiry').value = '';
             document.getElementById('modal-product-title').innerHTML = '<i class="ph-bold ph-plus text-blue-600 text-xl"></i> Novo Material';
             document.getElementById('div_initial_qty').classList.remove('hidden');
+            document.getElementById('div_initial_expiry').classList.remove('hidden');
             openModal('modal-product');
             setTimeout(() => document.getElementById('prod_barcode').focus(), 300);
         };
@@ -1793,8 +1794,9 @@
             document.getElementById('prod_weight_unit').value = p.weightUnit || '';
             document.getElementById('prod_min_qty').value = p.minQty;
             document.getElementById('prod_expiry').value = p.expiryDate || '';
-            document.getElementById('modal-product-title').innerHTML = '<i class="ph-bold ph-pencil-simple text-blue-600 text-xl"></i> Editar Material';
+            document.getElementById('modal-product-title').innerHTML = '<i class="ph-bold ph-pencil-simple text-blue-600 text-xl"></i> Editar Dados Base';
             document.getElementById('div_initial_qty').classList.add('hidden');
+            document.getElementById('div_initial_expiry').classList.add('hidden'); // Oculta a edição de validade no modal base, validade vem de lotes agora.
             openModal('modal-product');
         };
 
@@ -1842,11 +1844,8 @@
                 <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
                 <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm relative z-10 overflow-hidden transform scale-95 transition-transform">
                     <div class="p-6 text-center">
-                        <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
-                            <i class="ph-fill ph-warning-circle text-4xl text-red-500"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-800 mb-2">Atenção</h3>
-                        <p class="text-sm text-slate-500">${msg}</p>
+                        <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm"><i class="ph-fill ph-warning-circle text-4xl text-red-500"></i></div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-2">Atenção</h3><p class="text-sm text-slate-500">${msg}</p>
                     </div>
                     <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-center gap-3">
                         <button id="btn-c" class="px-5 py-2.5 text-slate-600 hover:bg-slate-200 rounded-xl text-sm font-bold w-full transition-colors">Cancelar</button>
@@ -1855,39 +1854,22 @@
                 </div>`;
             document.body.appendChild(div);
             requestAnimationFrame(() => { div.classList.remove('opacity-0'); div.querySelector('.bg-white').classList.remove('scale-95'); });
-            const close = () => {
-                div.classList.add('opacity-0'); div.querySelector('.bg-white').classList.add('scale-95');
-                setTimeout(() => div.remove(), 300);
-            };
-            div.querySelector('#btn-c').onclick = close;
-            div.querySelector('#btn-o').onclick = () => { onConfirm(); close(); };
+            const close = () => { div.classList.add('opacity-0'); div.querySelector('.bg-white').classList.add('scale-95'); setTimeout(() => div.remove(), 300); };
+            div.querySelector('#btn-c').onclick = close; div.querySelector('#btn-o').onclick = () => { onConfirm(); close(); };
         }
 
         function showToast(msg, type = 'success') {
-            const cont = document.getElementById('toast-container');
-            const t = document.createElement('div');
+            const cont = document.getElementById('toast-container'); const t = document.createElement('div');
             const isErr = type === 'error';
             t.className = `${isErr ? 'bg-red-600' : 'bg-emerald-600'} text-white px-5 py-3.5 rounded-xl shadow-xl flex items-center gap-3 toast-enter font-medium text-sm`;
             t.innerHTML = `<i class="ph-bold ${isErr ? 'ph-warning-circle' : 'ph-check-circle'} text-xl"></i><span>${msg}</span>`;
             cont.appendChild(t);
             requestAnimationFrame(() => { t.classList.remove('toast-enter'); t.classList.add('toast-enter-active'); });
-            setTimeout(() => {
-                t.classList.remove('toast-enter-active'); t.classList.add('toast-exit-active');
-                setTimeout(() => t.remove(), 300);
-            }, 3000);
+            setTimeout(() => { t.classList.remove('toast-enter-active'); t.classList.add('toast-exit-active'); setTimeout(() => t.remove(), 300); }, 3000);
         }
-
-        function formatNumber(num) { 
-            const n = parseFloat(num);
-            if (isNaN(n)) return 0;
-            return Number.isInteger(n) ? n : parseFloat(n.toFixed(2)); 
-        }
-        
-        function formatDateBR(ds) { if(!ds) return ''; const [y, m, d] = ds.split('-'); return `${d}/${m}/${y}`; }
 
         function updateConnectionStatus(connected, customMsg) {
-            const divs = [document.getElementById('connection-status'), document.getElementById('connection-status-mobile')];
-            divs.forEach(div => {
+            [document.getElementById('connection-status'), document.getElementById('connection-status-mobile')].forEach(div => {
                 if(!div) return;
                 div.innerHTML = connected 
                     ? `<span class="relative flex h-2.5 w-2.5"><span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span> <span class="hidden md:inline font-bold text-emerald-400">${customMsg || 'Online'}</span>` 
@@ -1902,18 +1884,11 @@
                 <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"></div>
                 <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden animate-fade-in">
                     <div class="p-6 text-center">
-                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
-                            <i class="ph-fill ph-database text-3xl text-red-500"></i>
-                        </div>
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm"><i class="ph-fill ph-database text-3xl text-red-500"></i></div>
                         <h3 class="text-xl font-bold text-slate-800 mb-3">Banco de Dados Ausente</h3>
-                        <p class="text-sm text-slate-600 mb-4">
-                            Você abriu o sistema localmente, mas não configurou as chaves de acesso. O sistema precisa do Firebase para gravar dados.
-                        </p>
+                        <p class="text-sm text-slate-600 mb-4">Você abriu o sistema localmente, mas não configurou as chaves de acesso. O sistema precisa do Firebase para gravar dados.</p>
                         <div class="text-left bg-slate-50 p-4 rounded-xl text-xs font-mono text-slate-500 border border-slate-200 mb-4 leading-relaxed shadow-inner">
-                            1. Acesse <b>console.firebase.google.com</b><br>
-                            2. Crie um projeto e ative o <b>Firestore Database</b><br>
-                            3. Ative o <b>Login Anônimo</b> na aba Authentication<br>
-                            4. Copie suas chaves e cole na variável <b>firebaseConfig</b> deste arquivo HTML.
+                            1. Acesse <b>console.firebase.google.com</b><br>2. Crie um projeto e ative o <b>Firestore Database</b><br>3. Ative o <b>Login Anônimo</b> na aba Authentication<br>4. Copie suas chaves e cole na variável <b>firebaseConfig</b> deste arquivo HTML.
                         </div>
                     </div>
                     <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-center gap-3">
@@ -1921,10 +1896,6 @@
                     </div>
                 </div>`;
             document.body.appendChild(div);
-            
-            document.getElementById('products-table-body').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400 font-medium">Aguardando configuração de banco de dados...</td></tr>';
-            document.getElementById('people-grid').innerHTML = '<div class="col-span-full py-10 text-center text-slate-400 font-medium">Aguardando configuração de banco de dados...</div>';
-            document.getElementById('history-table-body').innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400 font-medium">Aguardando configuração de banco de dados...</td></tr>';
         }
 
         initAuth();
